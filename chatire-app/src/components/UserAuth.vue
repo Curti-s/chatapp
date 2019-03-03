@@ -101,7 +101,7 @@ export default {
                     sessionStorage.setItem('authToken', response.data.auth_token);
                     resolve(response);
                 })
-                .cath(function(error) {
+                .catch(function(error) {
                     sessionStorage.removeItem('authToken');
                     reject(error);
                     alert(error);
