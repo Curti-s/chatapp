@@ -1,4 +1,4 @@
-from django.controb.auth import get_user_model
+from django.contrib.auth import get_user_model
 from .models import (
     ChatSession, ChatSessionMember, ChatSessionMessage, deserialize_user
 )
@@ -56,15 +56,15 @@ class ChatSessionView(APIView):
         return Response({
             'status': 'SUCCESS',
             'members': members,
-            'message': 'f{user.username} joined the chat',
+            'message': f'{user.username} joined the chat',
             'user': deserialize_user(user)
         })
-        
+
 class ChatSessionMessageView(APIView):
     """
     Create/Get Chat session messages.
     """
-    permission_classes = (permissions.IsAuthenticated)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         """
@@ -92,8 +92,8 @@ class ChatSessionMessageView(APIView):
         user = request.user
         chat_session = ChatSession.objects.get(uri=uri)
 
-        ChatSessionMessage.objects.create({
-            user=user, chat_session=chat_session, message=message})
+        ChatSessionMessage.objects.create(
+            user=user, chat_session=chat_session, message=message)
 
         return Response({
             'status': 'SUCCESS',
