@@ -99,20 +99,29 @@
 <script>
 
 export default {
-  data () {
+import axios from 'axios';
+
+data () {
     return {
       sessionStarted: false
     }
   },
 
   created () {
-    this.username = sessionStorage.getItem('username')
+    this.username = sessionStorage.getItem('username');
+    axios.default.common['Authorization'] = `Token ${sessionStorage.getItem('authToken')}`
   },
 
   methods: {
     startChatSession () {
-      this.sessionStarted = true
-      this.$router.push('/chat/chat_url/')
+        axios.post({'http://localhost:8000/api/chats/'}).then(response => {
+            alert("A new session has been created, you'll be redirected automatically");
+            this.sessionStarted = true
+            this.$router.push('/chat/chat_url/')
+        })
+        .catch(error => {
+            console.log(error);
+        })
     }
   }
 }
