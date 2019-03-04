@@ -67,52 +67,62 @@ export default {
         }
     },
     methods: {
-        signUp() {
-
-            return new Promise(function(resolve, reject) {
+        signUpRoutine(user) {
+            return new Promise((resolve, reject) => {
                 axios({
                     url: 'http://localhost:8000/auth/users/create',
-                    data: {
-                        email: this.email, 
-                        username: this.username, 
-                        password: this.password
-                    },
+                    data: user,
                     method: 'POST'
                 })
-                .then(function() {
-                    alert('Your acount has been created. You will be signed in automatically!');
-                    this.signIn();
+                .then((response) => {
+                    alert('Your account has been created. You will be signed in automatically!');
+                    resolve(response);
                 })
-                .catch(function(error) {
+                .catch((error) => {
                     reject(error);
-                    alert(error);
                 })
             });
             
         },
+        signUp() {
+            this.signUpRoutine({
+                email: this.email, 
+                username: this.username, 
+                password: this.password}).then(() =>{
+                this.signIn();
+            })
+            .catch(err => {
+                console.log(err);
+                console.log(err.data);
+            });
+        },
         signInRoutine(user) {
-            return new Promise(function(resolve, reject) {
+            return new Promise((resolve, reject) => {
                 axios({
                     url: 'http://localhost:8000/auth/token/create',
                     data: user,
                     method: 'POST'
                 })
-                .then(function(response) {
+                .then((response) => {
                     sessionStorage.setItem('authToken', response.data.auth_token);
+                    sessionStorage.setItem('username', response.data.username);
                     resolve(response);
                 })
-                .catch(function(error) {
+                .catch((error) => {
                     sessionStorage.removeItem('authToken');
                     reject(error);
-                    alert(error);
                 });
             })
             
         },
         signIn() {
-            const {username, password} = this;
-            this.signInRoutine({username, password}).then(function() {
+            this.signInRoutine({
+                username: this.username, 
+                password: this.password}).then(() => {
                 this.$router.push("/chat");
+            })
+            .catch(err => {
+                console.log(err);
             });
         }
     }
