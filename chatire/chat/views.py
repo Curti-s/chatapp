@@ -82,7 +82,7 @@ class ChatSessionMessageView(APIView):
             'messages': messages
         })
 
-    def post(self, request, *args,**kwargs):
+    def post(self, request, *args, **kwargs):
         """
         Create new message in a chat session
         """
@@ -91,10 +91,9 @@ class ChatSessionMessageView(APIView):
 
         user = request.user
         chat_session = ChatSession.objects.get(uri=uri)
-
-        ChatSessionMessage.objects.create(
-            user=user, chat_session=chat_session, message=message)
-
+        ChatSessionMessage.objects.create(user=user, 
+            chat_session=chat_session, message=message)
+        
         return Response({
             'status': 'SUCCESS',
             'uri': chat_session.uri,

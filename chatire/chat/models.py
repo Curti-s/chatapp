@@ -48,6 +48,7 @@ class ChatSessionMessage(TrackableDateModel):
     """
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     chat_session = models.ForeignKey(ChatSession, related_name='messages', on_delete=models.PROTECT)
+    message = models.TextField(max_length=200, default='')
 
     def to_json():
         """
