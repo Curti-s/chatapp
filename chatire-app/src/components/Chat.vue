@@ -10,57 +10,36 @@
 
           <div class="card-body">
             <div class="container chat-body">
-              <div class="row chat-section">
-                <div class="col-sm-2">
-                  <img class="rounded-circle" src="http://placehold.it/40/f16000/fff&text=D" />
-                </div>
-                <div class="col-sm-7">
-                  <span class="card-text speech-bubble speech-bubble-peer">Hello!</span>
-                </div>
-              </div>
-              <div class="row chat-section">
-                <div class="col-sm-7 offset-3">
-                  <span class="card-text speech-bubble speech-bubble-user float-right text-white subtle-blue-gradient">
-                    Whatsup, another chat app?
-                  </span>
-                </div>
-                <div class="col-sm-2">
-                  <img class="rounded-circle" src="http://placehold.it/40/333333/fff&text=A" />
-                </div>
-              </div>
-              <div class="row chat-section">
-                <div class="col-sm-2">
-                  <img class="rounded-circle" src="http://placehold.it/40/f16000/fff&text=D" />
-                </div>
-                <div class="col-sm-7">
-                  <p class="card-text speech-bubble speech-bubble-peer">
-                    Yes this is Chatire, it's pretty cool and it's Open source
-                    and it was built with Django and Vue JS so we can tweak it to our satisfaction.
-                  </p>
-                </div>
-              </div>
-              <div class="row chat-section">
-                <div class="col-sm-7 offset-3">
-                  <p class="card-text speech-bubble speech-bubble-user float-right text-white subtle-blue-gradient">
-                    Okay i'm already hacking around let me see what i can do to this thing.
-                  </p>
-                </div>
-                <div class="col-sm-2">
-                  <img class="rounded-circle" src="http://placehold.it/40/333333/fff&text=A" />
-                </div>
-              </div>
-              <div class="row chat-section">
-                <div class="col-sm-7 offset-3">
-                  <p class="card-text speech-bubble speech-bubble-user float-right text-white subtle-blue-gradient">
-                    We should invite james to see this.
-                  </p>
-                </div>
-                <div class="col-sm-2">
-                  <img class="rounded-circle" src="http://placehold.it/40/333333/fff&text=A" />
-                </div>
-              </div>
+              <div
+                v-for="message in messages"
+                :key="message.id" 
+                class="row chat-section">
+                
+                <template
+                    v-if="username === message.user.username">
+                    <div class="col-sm-7 offset-3">
+                        <span class="card-text speech-bubble speech-bubble-user float-right text-white subtle-blue-gradient">
+                        {{ message.message }} {{username}}
+                        </span>
+                  </div>
+                  <div class="col-sm-2">
+                    <img class="rounded-circle" :src="`http://placehold.it/40/007bff/fff&text=${message.user.username[0].toUpperCase()}`" />
+                  </div>
+                </template>
+
+                <template v-else>
+                    <div class="col-sm-2">
+                        <img class="rounded-circle" :src="`http://placehold.it/40/333333/fff&text=${message.user.username[0].toUpperCase()}`" />
+                    </div>
+                    <div class="col-sm-7">
+                        <span class="card-text speech-bubble speech-bubble-peer float-left">
+                            {{ message.message }}
+                        </span>
+                    </div>
+                </template>
             </div>
           </div>
+        </div>
 
           <div class="card-footer text-muted">
             <form>
@@ -97,27 +76,31 @@
 </template>
 
 <script>
+import axios from 'axios';
 
 export default {
-import axios from 'axios';
 
 data () {
     return {
-      sessionStarted: false
+        sessionStarted: false,
+        messages: [
+          {"status":"SUCCESS","uri":"5bd1e4d5694e456","message":"Hello!","user":{"id":5,"username":"trish","email":"trish@gmail.com","first_name":"","last_name":""}},
+          {"status":"SUCCESS","uri":"5bd1e4d5694e456","message":"Hello!","user":{"id":5,"username":"girlchild","email":"girlchild@gmail.com","first_name":"","last_name":""}},
+      ]
     }
   },
 
   created () {
     this.username = sessionStorage.getItem('username');
-    axios.default.common['Authorization'] = `Token ${sessionStorage.getItem('authToken')}`
+    axios.defaults.headers.common['Authorization'] = `Token ${sessionStorage.getItem('authToken')}`
   },
 
   methods: {
-    startChatSession () {
-        axios.post({'http://localhost:8000/api/chats/'}).then(response => {
+      startChatSession () {
+          axios.post('http://localhost:8000/api/chats/').then(response => {
             alert("A new session has been created, you'll be redirected automatically");
             this.sessionStarted = true
-            this.$router.push('/chat/chat_url/')
+            this.$router.push(`/chat/${response.data.uri}/`)
         })
         .catch(error => {
             console.log(error);
