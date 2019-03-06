@@ -15,11 +15,10 @@
                 :key="message.id" 
                 class="row chat-section">
                 
-                <template
-                    v-if="username === message.user.username">
+                <template v-if="username === message.user.username">
                     <div class="col-sm-7 offset-3">
                         <span class="card-text speech-bubble speech-bubble-user float-right text-white subtle-blue-gradient">
-                        {{ message.message }} {{username}}
+                        {{ message.message }}
                         </span>
                   </div>
                   <div class="col-sm-2">
@@ -42,10 +41,10 @@
         </div>
 
           <div class="card-footer text-muted">
-            <form>
+            <form @submit.prevent='postMessage'>
               <div class="row">
                 <div class="col-sm-10">
-                  <input type="text" placeholder="Type a message" />
+                  <input type="text" v-model='message' placeholder="Type a message" />
                 </div>
                 <div class="col-sm-2">
                   <button class="btn btn-primary">Send</button>
@@ -83,16 +82,18 @@ export default {
 data () {
     return {
         sessionStarted: false,
-        messages: [
-          {"status":"SUCCESS","uri":"5bd1e4d5694e456","message":"Hello!","user":{"id":5,"username":"trish","email":"trish@gmail.com","first_name":"","last_name":""}},
-          {"status":"SUCCESS","uri":"5bd1e4d5694e456","message":"Hello!","user":{"id":5,"username":"girlchild","email":"girlchild@gmail.com","first_name":"","last_name":""}},
-      ]
+        messages: [],
+        message: ''
     }
   },
 
   created () {
     this.username = sessionStorage.getItem('username');
     axios.defaults.headers.common['Authorization'] = `Token ${sessionStorage.getItem('authToken')}`
+
+    if(this.$route.params.uri) {
+        this.joinChatSession();
+    }
   },
 
   methods: {
@@ -101,6 +102,49 @@ data () {
             alert("A new session has been created, you'll be redirected automatically");
             this.sessionStarted = true
             this.$router.push(`/chat/${response.data.uri}/`)
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    },
+    postMessage() {
+
+        axios({
+            url: `http://localhost:8000/api/chats/${this.$route.params.uri}/messages/`,
+            data: {'message': this.message},
+            method: 'POST'
+        })
+        .then((response) => {
+            this.messages.push(response.data);
+            this.message= '';
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    },
+    joinChatSession() {
+        axios({
+            url: `http://localhost:8000/api/chats/${this.$route.params.uri}/`,
+            data: {'username': this.username},
+            method: 'PATCH',
+        }).then((response) => {
+            let user = response.data.members.find(member => member.username == this.username);
+            if(user) {
+                // the user belongs/has joined the session
+                this.sessionStarted = true;
+                this.fetchChatHistory();
+            }
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    },
+    fetchChatHistory() {
+        axios({
+            url: `http://localhost:8000/api/chats/${this.$route.params.uri}/messages/`,
+            method: 'GET'
+        }).then(response => {
+            this.messages = response.data.messages;
         })
         .catch(error => {
             console.log(error);
