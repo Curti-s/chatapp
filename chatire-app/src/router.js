@@ -25,7 +25,7 @@ const router = new Router({
         import(/* webpackChunkName: "about" */ "./views/About.vue")
     },
     {
-      path: "/chat",
+      path: "/chat/:uri?",
       name: "chat",
       component: Chat
     },

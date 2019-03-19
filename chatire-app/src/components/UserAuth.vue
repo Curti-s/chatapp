@@ -105,7 +105,8 @@ export default {
                 })
                 .then((response) => {
                     sessionStorage.setItem('authToken', response.data.auth_token);
-                    sessionStorage.setItem('username', response.data.username);
+                    sessionStorage.setItem('username',user.username)
+                    console.log(user.username)
                     resolve(response);
                 })
                 .catch((error) => {
@@ -116,9 +117,8 @@ export default {
             
         },
         signIn() {
-            this.signInRoutine({
-                username: this.username, 
-                password: this.password}).then(() => {
+            const {username, password} = this;
+            this.signInRoutine({username, password}).then(() => {
                 this.$router.push("/chat");
             })
             .catch(err => {
